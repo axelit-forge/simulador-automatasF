@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
-project(simulador_automata)
+project(simulador_automata C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(simulador-automata
-        TAD_string.c
-        Tad_data.c
-        TAD_upla.c
-        TAD_automata.c
-        main.c
+add_executable(simulador_automata
+    src/main.c
+    src/TAD_automata.c
+    src/TAD_upla.c
+    src/Tad_data.c
+    src/src/TAD_string.c
 )
+
+target_include_directories(simulador_automata PRIVATE include)
