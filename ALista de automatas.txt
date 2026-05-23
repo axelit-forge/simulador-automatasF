@@ -1,0 +1,8 @@
+Guia:
+Datos1 : determinista; cadenas que contengan 011
+Datos2 : determinista; cadenas con 0's par y 1's impar
+Datos3 : determinista; cadenas que terminan con ato, ata, ala, talo, otto
+Datos4 : no determinista; cadenas que terminan en 0101
+Datos5 : no determinista; cadenas que empiezan con zyx
+Datos6 : no determinista; cadenas que terminan con ab o solo aa
+Datos7 : no determinista; cadenas de numeros binarios, multiplos de 5 o 3
