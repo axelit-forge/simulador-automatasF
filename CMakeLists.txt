@@ -8,7 +8,7 @@ add_executable(simulador_automata
     src/TAD_automata.c
     src/TAD_upla.c
     src/Tad_data.c
-    src/src/TAD_string.c
+    src/TAD_string.c
 )
 
 target_include_directories(simulador_automata PRIVATE include)
