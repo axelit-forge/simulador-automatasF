@@ -14,6 +14,7 @@ compile_commands.json
 # Binarios ejecutables compilados (los que te aparecieron en el commit)
 simulador_automata
 test_str
+test_data
 
 # Archivos locales de entornos/IDEs
 .cmake/

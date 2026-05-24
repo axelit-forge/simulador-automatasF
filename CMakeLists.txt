@@ -7,9 +7,9 @@ add_executable(simulador_automata
     src/main.c
     src/TAD_automata.c
     src/TAD_upla.c
-    src/Tad_data.c
+        src/TAD_data.c
     src/TAD_string.c
-        src/test_string.c
+        src/test_data.c
 )
 
 target_include_directories(simulador_automata PUBLIC

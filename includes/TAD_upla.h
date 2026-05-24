@@ -1,7 +1,7 @@
 #ifndef TAD_UPLA_H
 #define TAD_UPLA_H
 #include <string.h>
-#include "Tad_data.h"
+#include "TAD_data.h"
 #define TAM 100	
 typedef tData tUpla;
 

@@ -1,11 +1,11 @@
-#include "Tad_data.h"
+#include "TAD_data.h"
 
 tData createData(int tipo){
 	tData nvo;
 	nvo = (tData) malloc (sizeof(TNodoData));
 	
 	if(tipo == STR){
-		nvo->cad = create();
+		nvo->cad = NULL;
 		nvo->tipoNodo = STR;
 	}
 	else {
@@ -27,87 +27,78 @@ tData createStr(){
 
 void mostrarData(tData nodo){
 	
-	if(nodo == NULL) return;
-	
-	
+	if(!nodo) return;
+
+	tData trav = NULL;
+
 	switch(nodo->tipoNodo){
 	case STR: 
 		print(nodo->cad);
 		break;
 	case LIST:
 		printf("[");
-		
-		tData aux;
-		aux= nodo;
-		while(aux != NULL){
-			mostrarData(aux->dato);
-			if(aux->sig != NULL)
+
+		trav= nodo;
+		while(trav != NULL){
+			mostrarData(trav->dato);
+			if(trav->sig != NULL)
 				printf(",");
-			aux = aux->sig;
+			trav = trav->sig;
 		}
 		printf("]");
 		
 		break;
 	case SET:
 		printf("{");
-		
-		tData aux2;
-		aux2= nodo;
-		while(aux2 != NULL){
-			mostrarData(aux2->dato);
-			if(aux2->sig != NULL)
+
+		trav= nodo;
+		while(trav != NULL){
+			mostrarData(trav->dato);
+			if(trav->sig != NULL)
 				printf(",");
-			aux2 = aux2->sig;
+			trav = trav->sig;
 		}
 		printf("}");
 		break;
-		
+		default:break;
 	}
 }
 
 void agregarData(tData* cab, tData elem){
-	
-	if((*cab) == NULL || (*cab)->dato == NULL){
-		tData nvo;
-		
-		if(elem->tipoNodo == STR){
-			if((*cab) != NULL)
-				nvo = createData((*cab)->tipoNodo);
-			else
-				nvo = createList();
-			nvo->dato = copiarData(elem);
-			*cab = nvo;
-		}
-		else{
-			tData nvo = createData((*cab != NULL) ? (*cab)->tipoNodo : LIST);  // o SET según contexto
-			nvo->dato = copiarData(elem);
-			*cab = nvo;
-		}
+
+	if (!(*cab) || (*cab)->tipoNodo == STR || !elem) return;
+
+	if ( (*cab)->dato == NULL) {
+		(*cab)->dato = copiarData(elem);
+		return;
 	}
-	else{
-		switch ((*cab)->tipoNodo){
-		case STR: 
-			return;
-			break;
-		case SET:
-		case LIST: {
-			tData aux = *cab;
-			tData nvo;
-			
-			if (aux->tipoNodo == SET) {
-				if(pertenece(aux, elem) == 0) 
-					return;
-			}
-			while (aux->sig != NULL)
+	tData aux;
+
+	switch ((*cab)->tipoNodo) {
+	case SET:
+		aux = *cab;
+
+		if(pertenece(aux, elem) == 0) {
+			while (aux->sig)
 				aux = aux->sig;
-			
-			nvo = createData(aux->tipoNodo);
-			nvo->dato = copiarData(elem);
-			aux->sig = nvo;
-			break;
-			}
+			aux->sig = createSet();
+			aux = aux->sig;
+			aux->dato = copiarData(elem);
 		}
+	break;
+	case LIST:
+		aux = *cab;
+
+		while (aux->sig)
+			aux = aux->sig;
+
+		aux->sig = createList();
+		aux = aux->sig;
+		aux->dato = copiarData(elem);
+	break;
+	default: break;
 	}
+
 }	
 	
 //funciones nucleo	
@@ -117,7 +108,7 @@ tData copiarData (tData copiado){
 	
 	switch (copiado->tipoNodo){
 	case STR:
-		nvo = createStr(); 
+		nvo = createStr();
 		nvo->cad = copyStr(copiado->cad);
 		break;
 	case LIST:
@@ -153,57 +144,60 @@ void freeData(tData descartado){
 	free(descartado);
 }
 	
-int Igualdad(tData A, tData B){
+int igualdad(tData A, tData B){
 		
-	if(A==NULL && B==NULL) return 0;
-	if(A==NULL || B==NULL || (A->tipoNodo!=B->tipoNodo)) return 1;
-	
-	
+	if(!A && !B) return 0;
+	if(!A || !B || (A->tipoNodo != B->tipoNodo)) return 1;
+
+	tData trav1 = NULL, trav2 = NULL;
 	switch(A->tipoNodo){
-	case STR: 
+	case STR:
 		return compStr(A->cad,B->cad);
-		break;
-	case SET:{
-		tData auxA = A;
-		while(auxA != NULL){
-			if(pertenece(B, auxA->dato) != 0) return 1;
-				auxA = auxA->sig;
+
+	case SET:
+		trav1 = A;
+		while(trav1){
+			if(pertenece(B, trav1->dato) == 0)
+				return 1;
+			trav1 = trav1->sig;
 		}
-		tData auxB = B;
-		while(auxB != NULL){
-			if(pertenece(A, auxB->dato) != 0) return 1;
-				auxB = auxB->sig;
+		trav1 = B;
+		while(trav1){
+			if(pertenece(A, trav1->dato) == 0)
+				return 1;
+			trav1 = trav1->sig;
 		}
 		return 0;
-		}
-		
-	case LIST:{
-		tData auxA = A;
-		tData auxB = B;
+	break;
+	case LIST:
+		trav1 = A;
+		trav2 = B;
 
-		while(auxA != NULL && auxB != NULL){
-			if(Igualdad(auxA->dato, auxB->dato) != 0) return 1;
-				auxA = auxA->sig;
-				auxB = auxB->sig;
+		while(trav1 && trav2){
+			if(igualdad(trav1->dato, trav2->dato) != 0)
+				return 1;
+			trav1 = trav1->sig;
+			trav2 = trav2->sig;
 			}
-			if(auxA != NULL || auxB != NULL)
+			if(trav1 || trav2)
 				return 1;
 
 			return 0;
-			}	
-	default: return 1;
+	break;
+	default: break;
 	}
-}	
+	return 0;
+}
 
 tData Cargar (){
 	tData nvo = NULL;
 	
-	nvo = crear_arbol(0, 0);
+	nvo = crearArbol(0, 0);
 	
 	return nvo;
 }	
 
-void mostrartipo(int tipo){
+void mostrarTipo(int tipo){
 	switch(tipo){
 	case 1: printf("string"); break;
 	case 2: printf("list"); break;
@@ -212,7 +206,7 @@ void mostrartipo(int tipo){
 	}
 }
 	
-int retorna_tipo(){
+int retornaTipo(){
 	int op;
 	do{printf("\nQue desea agregar");
 	printf("\nPresione 1 cadena");
@@ -234,35 +228,30 @@ int continuar(int nivel){
 	return op;
 }
 	
-tData crear_arbol(int nivel, int tipo){
+tData crearArbol(int nivel, int tipo){
 	int op;
 	tData nva=NULL;
 	
 	printf("\n Se encuentra en el nivel : %d", nivel);
-	printf("\n El tipo de dato en este nivel es : "); mostrartipo(tipo);
-	op=retorna_tipo();
-	
-	
+	printf("\n El tipo de dato en este nivel es : ");
+	mostrarTipo(tipo);
+	op=retornaTipo();
+
 	if(op!=STR){
 		nva = createData(op);
-		
 		do {
-			tData hijo = crear_arbol(nivel + 1, op);
-			
-		
+			tData hijo = crearArbol(nivel + 1, op);
 			agregarData(&nva, hijo);
 		} while (continuar(nivel+1) == 1);
 	}
 	else{
 		nva=createStr();
-		
 		printf("Ingrese la cadena: ");
 		nva->cad=load();
 		return nva;
 	}
 	return nva;
-}		
-	
+}
 //conjuntos
 	
 tData Union (tData A, tData B){
@@ -273,7 +262,17 @@ tData Union (tData A, tData B){
 	
 	if (A->tipoNodo != SET || B->tipoNodo != SET)
 		return NULL;
-	
+
+	tData C = createSet();
+	while (A) {
+		agregarData(&C, A->dato);
+		A = A->sig;
+	}
+	while (B) {
+		agregarData(&C, B->dato);
+		B = B->sig;
+	}
+	return C; /*
 	tData C_Cab = NULL, C_act = NULL;
 	tData aux;
 	
@@ -305,7 +304,7 @@ tData Union (tData A, tData B){
 		B = B->sig;
 	}
 	
-	return C_Cab;
+	return C_Cab;*/
 }
 
 tData Interseccion (tData A, tData B){
@@ -378,26 +377,25 @@ tData DifSimetrica (tData A, tData B){
 }
 
 int pertenece(tData A, tData elem){
-	if (A == NULL || elem == NULL) return 1;
-	if (A->tipoNodo != LIST && A->tipoNodo != SET) return 1;
+	if (!A || A->tipoNodo == STR) return 0;
+	if (!elem) return 1;
 		
 	tData aux = A;
-		
 	while (aux != NULL) {
-		if (Igualdad(aux->dato, elem) == 0)
-			return 0;
+		if (igualdad(aux->dato, elem) == 0)
+			return 1;
 		aux = aux->sig;
 	}
 	
-	return 1;
+	return 0;
 }
 
 int contenido(tData A, tData B){
-	
-	tData auxA = A;
-	while(auxA != NULL){
-		if(pertenece(B, auxA->dato) != 0) return 0;
-		auxA = auxA->sig;
+
+	while(A != NULL){
+		if(pertenece(B, A->dato) == 0)
+			return 0;
+		A = A->sig;
 	}
 	return 1;
 }
@@ -408,130 +406,116 @@ int cardinalidad (tData A){
 		return 0;
 	
 	int c= 0;
-	
 	while(A!= NULL){
 		c++;
 		A = A->sig;
 	}
-	
 	return c;
 }
 
-	
-tData toSetWToken(tData cad, char token){
-	
-	if(cad == NULL || cad->tipoNodo != STR)
-		return NULL;
-	
-	
-	tData A_Cab = NULL;
-	tData A_act = NULL;
-	tData Aux;
-	tData restante = NULL;
-	tData nvoStr;
-	
-	restante = copiarData(cad);
-	
-	while (restante->cad != NULL && restante->cad != '\0') {
-		tData parte= createStr();
-		parte->cad = before_token(restante->cad, token);  
-		tData siguiente= createStr();
-		siguiente->cad = after_token(restante->cad, token); 
-		
-		nvoStr = createStr();
-		nvoStr->cad = parte->cad;  
-		
-		if (pertenece(A_Cab, nvoStr) != 0) {
-			Aux = createSet();
-			Aux->dato = nvoStr;
-			
-			if (A_Cab == NULL) A_Cab = Aux;
-			else A_act->sig = Aux;
-			
-			A_act = Aux;
-		} else {
-			freeData(nvoStr); 
-		}
-		
-		free(restante->cad);          
-		restante->cad = siguiente->cad;    
-	}
-	
-	freeData(restante); 
+tData __procesadoCadena(str * origen) {
+	if (!origen) return NULL;
 
-	return A_Cab;
-}	
+	tData nuevo=NULL;
+	switch ((*origen)->dato) {
+		case '{':
+			nuevo = createSet();
+			*origen = (*origen)->sig;
+			while ((*origen)->dato != '}') {
+				tData elemento = __procesadoCadena(origen);
+				agregarData(&nuevo, elemento);
+				freeData(elemento);
 
-tData procesar_cadena_simple(str *restante) {
-	str parte = before_token(*restante, ',');
-	parte = before_token(parte, ']');
-	parte = before_token(parte, '}');
-	
-	tData nodo = createStr();
-	if (nodo != NULL) {
-	nodo->cad = copyStr(parte);
+				if ((*origen)->dato == ',') *origen = (*origen)->sig;
+
+			}
+			*origen = (*origen)->sig;
+
+		break;
+		case '[':
+			nuevo = createList();
+			*origen = (*origen)->sig;
+			while ((*origen)->dato != ']') {
+				tData elemento = __procesadoCadena(origen);
+				agregarData(&nuevo, elemento);
+				freeData(elemento);
+
+				if ((*origen)->dato == ',') *origen = (*origen)->sig;
+			}
+			*origen = (*origen)->sig;
+
+		break;
+		default:
+			nuevo = createStr();
+			str head =NULL;
+			str ultimo=NULL;
+
+			while ((*origen) != NULL && (*origen)->dato != ',' && (*origen)->dato != '}' && (*origen)->dato != ']') {
+
+				str nvo_caracter = create();
+				nvo_caracter->dato = (*origen)->dato;
+
+				if (!head)
+					head = nvo_caracter;
+				else
+					ultimo->sig = nvo_caracter;
+
+				ultimo = nvo_caracter;
+				*origen = (*origen)->sig;
+			}
+			nuevo->cad = head;
+		break;
 	}
-	while (*restante != NULL && (*restante)->dato != ',' && (*restante)->dato != ']' && (*restante)->dato != '}') {
-	*restante = (*restante)->sig;
-	}
-	freeString(parte);
-	
-	return nodo;
+	return  nuevo;
 }
-	
-tData buscarCadena(str *restante) {
-	if (*restante == NULL) return NULL;
-	
-	tData nodo = NULL;
-	char primer_car = (*restante)->dato;
-	char delimitador = (primer_car == '[') ? ']' : '}'; 
-	
-	if (primer_car == '[') {
-	nodo = createList();
-	} else if (primer_car == '{') {
-	nodo = createSet();
-	} else {return procesar_cadena_simple(restante);
+
+int __llavesEqui (const char* revisar) {
+	int i = 0;
+
+	int simpilaCorchet = 0;
+	int simpilaLLave = 0;
+	if (revisar[0] != '{' && revisar[0] != '[')
+		return 0;
+
+	while (revisar[i]!= '\0') {
+		if (revisar[i] == '{') simpilaLLave++;
+		if (revisar[i] == '[') simpilaCorchet++;
+		if (revisar[i] == '}') simpilaLLave--;
+		if (revisar[i] == ']') simpilaCorchet--;
+		if (simpilaCorchet<0 ||  simpilaLLave<0) return 0;
+
+		i++;
 	}
-	
-	*restante = (*restante)->sig; 
-	
-	while (*restante != NULL && (*restante)->dato != delimitador) {
-	tData elem = buscarCadena(restante);
-	if (elem != NULL) {
-	agregarData(&nodo, elem);
-	}
-	if (*restante != NULL && (*restante)->dato == ',') {
-		*restante = (*restante)->sig;
-	}}
-	
-	if (*restante != NULL) {
-	*restante = (*restante)->sig;
-	}
-	
-return nodo;
+	return  (simpilaLLave == 0 && simpilaCorchet == 0);
 }
-	
+
 tData crearDesdeCadena(const char *input) {
-	str S = load2(input);
-	str restante = S;
-	tData resultado = buscarCadena(&restante);
-	freeString(S);
+	tData resultado = NULL;
+	int bienDefinido = __llavesEqui(input);
+	if (bienDefinido){
+		str cadenaInput = load2(input);
+		str copia = cadenaInput;
+		resultado = __procesadoCadena(&copia);
+		freeString(cadenaInput);
+	}
+	else {
+		resultado = createStr();
+		resultado->cad = load2(input);
+	}
 	return resultado;
 }
 
 
-char dataAcadena(tData a){
-	if(a->tipoNodo != STR)
+char simboloDeData(tData a){				//devuelve solo el primer cad
+	if(!a || a->tipoNodo != STR)
 		return '\0';
-	else{
+	else
 		return a->cad->dato;
-	}
 }
 	
-tData toString(tData H) {
+tData toString(tData H) {					//revisar para que funcione, de todas formas no es util en el programa
 	tData nvo = createStr();
-	nvo->cad = NULL;
-	
+
 	str resultado = create(); 
 	resultado->dato = '{';
 	
@@ -563,9 +547,9 @@ tData toString(tData H) {
 	return nvo;
 }
 
-tData obtener_elemento(tData lista, int pos) {
-	for (int i = 0; i < pos && lista != NULL; i++) {
+tData obtenerElemento(tData lista, int pos) {
+	for (int i = 0; i < pos && lista; i++) {
 		lista = lista->sig;
 	}
-	return (lista != NULL) ? lista->dato : NULL;
+	return (lista) ? lista->dato : NULL;
 }	

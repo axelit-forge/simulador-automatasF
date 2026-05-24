@@ -198,7 +198,7 @@ tData creaResidual(){
 
 
 tData BuscameT(tUpla Est,tUpla delta,tUpla alf){
-	char c = dataAcadena(alf->dato);
+	char c = simboloDeData(alf->dato);
 	
 	while(Est!=NULL){
 		tData temp;
@@ -257,7 +257,7 @@ tAF ConversionAF(tAF A){
 		auxAlf = B.Alfabeto;
 		while(auxAlf!=NULL){
 			
-			char car = dataAcadena(auxAlf->dato);
+			char car = simboloDeData(auxAlf->dato);
 			destino = RetornaEstado(nvoE,A.Delta,car);
 			
 			origen = copiarData(nvoE);
@@ -308,10 +308,10 @@ tAF ConversionAF(tAF A){
 tData buscarRenombre(tData original, tUpla listaCambios) {
 	while (listaCambios != NULL) {
 		tData par = listaCambios->dato;
-		tData viejo = obtener_elemento(par, 0);
-		tData nuevo = obtener_elemento(par, 1);
+		tData viejo = obtenerElemento(par, 0);
+		tData nuevo = obtenerElemento(par, 1);
 		
-		if (viejo != NULL && Igualdad(viejo, original) == 0) {
+		if (viejo != NULL && igualdad(viejo, original) == 0) {
 			return nuevo;
 		}
 		listaCambios = listaCambios->sig;

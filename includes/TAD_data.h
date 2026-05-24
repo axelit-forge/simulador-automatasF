@@ -27,13 +27,13 @@ tData createSet();
 tData createStr();
 
 //funciones nucleo
-int Igualdad(tData, tData);
+int igualdad(tData, tData);
 tData copiarData(tData);
 void mostrarData(tData);
 void agregarData(tData*, tData);
 void freeData(tData);
-tData Cargar();
-tData crear_arbol(int, int);
+tData cargar();
+tData crearArbol(int, int);
 tData toString(tData);
 
 //operaciones de conjunto
@@ -44,13 +44,13 @@ tData DifSimetrica (tData, tData);
 int pertenece(tData,tData);
 int cardinalidad (tData);
 int contenido (tData, tData);
-tData toSetWToken(tData, char);
+
 
 //funcion de cargar por cadena
 tData crearDesdeCadena(const char*);
 
 //funciones auxiliares de AF
-char dataAcadena(tData);
-tData obtener_elemento(tData, int);
+char simboloDeData(tData);
+tData obtenerElemento(tData, int);
 
 #endif

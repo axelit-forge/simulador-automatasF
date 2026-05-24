@@ -14,12 +14,12 @@ tData transicion(tData ini, tUpla transi, char c) {
 	while (transi != NULL) {
 		tData sublista = transi->dato;
 
-		tData origen   = obtener_elemento(sublista, 0);
-		tData simbolo  = obtener_elemento(sublista, 1);
-		tData destino  = obtener_elemento(sublista, 2);
+		tData origen   = obtenerElemento(sublista, 0);
+		tData simbolo  = obtenerElemento(sublista, 1);
+		tData destino  = obtenerElemento(sublista, 2);
 
-		if (origen != NULL && Igualdad(origen, ini) == 0) {
-			if (simbolo != NULL && dataAcadena(simbolo) == c) {
+		if (origen != NULL && igualdad(origen, ini) == 0) {
+			if (simbolo != NULL && simboloDeData(simbolo) == c) {
 				return copiarData(destino);
 			}
 		}
@@ -34,7 +34,7 @@ int Verifica_alfabeto(str Cad, tUpla alfabeto){
 		tUpla aux = alfabeto;
 		
 		while(aux != NULL && pertenece == 0){
-			char simbolo = dataAcadena(aux->dato);
+			char simbolo = simboloDeData(aux->dato);
 			
 			if (Cad->dato == simbolo){
 				pertenece = 1;
@@ -329,16 +329,16 @@ tUpla cargarTransicion2(tUpla Alfa, tUpla Estados) {
 			token = strtok(NULL, ";");
 			if (token == NULL) break;
 			
-/*			Solo agregamos la transición si el destino NO es "*"*/
+/*			Solo agregamos la transiciï¿½n si el destino NO es "*"*/
 			if (strcmp(token, "*") != 0) {
 				tData simbolo = copiarData(alfaActual->dato);
 				tData destino = NULL;
 				destino = crearDesdeCadena(token);
 				
-/*				 Crear la transición*/
+/*				 Crear la transiciï¿½n*/
 				nav = createList();
 				agregarData(&nav, copiarData(estadoOrigen)); // origen
-				agregarData(&nav, simbolo);                  // símbolo
+				agregarData(&nav, simbolo);                  // sï¿½mbolo
 				agregarData(&nav, destino);                  // destino
 				
 				agregarData(&nuevo, nav);
