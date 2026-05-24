@@ -1,3 +1,0 @@
-/home/axel/proyectos/simulador-automata/CMakeFiles/simulador_automata.dir
-/home/axel/proyectos/simulador-automata/CMakeFiles/edit_cache.dir
-/home/axel/proyectos/simulador-automata/CMakeFiles/rebuild_cache.dir
