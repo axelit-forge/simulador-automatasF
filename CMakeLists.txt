@@ -9,6 +9,10 @@ add_executable(simulador_automata
     src/TAD_upla.c
     src/Tad_data.c
     src/TAD_string.c
+        src/test_string.c
 )
 
-target_include_directories(simulador_automata PRIVATE include)
+target_include_directories(simulador_automata PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/includes
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+)
