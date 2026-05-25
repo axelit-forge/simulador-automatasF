@@ -20,7 +20,7 @@ tData transicion(tData ini, tUpla transi, char c) {
 
 		if (origen != NULL && igualdad(origen, ini) == 0) {
 			if (simbolo != NULL && simboloDeData(simbolo) == c) {
-				return copiarData(destino);
+				return destino;
 			}
 		}
 		transi = transi->sig;
@@ -29,25 +29,16 @@ tData transicion(tData ini, tUpla transi, char c) {
 }	
 
 int Verifica_alfabeto(str Cad, tUpla alfabeto){
-	while (Cad != NULL){
-		int pertenece = 0;
-		tUpla aux = alfabeto;
-		
-		while(aux != NULL && pertenece == 0){
-			char simbolo = simboloDeData(aux->dato);
-			
-			if (Cad->dato == simbolo){
-				pertenece = 1;
-			}
-			aux = aux->sig;
+	while (alfabeto) {
+		while (Cad) {
+			char simbolo =  simboloDeData(alfabeto->dato);
+			if (Cad->dato == simbolo)
+				return 0;
+			Cad = Cad->sig;
 		}
-		
-		if (pertenece == 0){
-			return 0; 
-		}
-		Cad = Cad->sig;
+		alfabeto = alfabeto->sig;
 	}
-	return 1; 
+	return 1;
 }
 	
 
@@ -75,6 +66,7 @@ tUpla cargarEstados(){
 	printf("\nIngrese el estado: ");
 	nva->cad=load();
 	agregarData(&nuevo, nva);
+	freeData(nva);
 	b=seguir();
 	}
 	
@@ -93,6 +85,7 @@ tUpla cargarAlfabeto(){
 		printf("\nIngrese el caracter: ");
 		aux->cad=load();
 		agregarData(&nuevo, aux);
+		freeData(aux);
 		b=seguir();
 	}
 	
@@ -127,6 +120,7 @@ tUpla cargarFinal(tUpla Estado){
 			aux->cad=load();
 			if(pertenece(Estado,aux)==0){
 				agregarData(&nuevo, aux);
+				freeData(aux);
 				mostrarData(nuevo);
             }
 		}while(pertenece(Estado,aux)==1);
@@ -170,10 +164,11 @@ tUpla cargarTransicion(tUpla Alfa, tUpla Estado, int a){
 				agregarData(&nav,aux);
 				
 			}
+			freeData(aux);
 			agregarData(&nuevo, nav);
 			
-			nav=NULL;
-			
+			freeData(nav);
+			nav = NULL;
 			
 			Alfa= Alfa->sig;
 		} 
@@ -355,4 +350,8 @@ tUpla cargarTransicion2(tUpla Alfa, tUpla Estados) {
 	return nuevo;
 }
 
+tUpla cargarContenidoCSV(const char* Ruta) {
+	//salvese quien pueda :'v
 
+
+}

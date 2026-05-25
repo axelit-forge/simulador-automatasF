@@ -178,14 +178,23 @@ void MostrarUpla(tAF B){
 }
 
 
-tAF Cargar_desde_excel() {
+tAF cargaCSV(const char* rutaCSV) {
 	tAF Aut;
-	
-	Aut.Alfabeto = cargarAlfabeto2();
-	Aut.ConjE = cargarEstado2();
-	Aut.Inicial = cargarInicial2();
-	Aut.ConjA=cargarFinal2();
-	Aut.Delta=cargarTransicion2(Aut.Alfabeto,Aut.ConjE);
+
+	tUpla contenido = cargarContenidoCSV(rutaCSV);
+
+	if (contenido) {
+		Aut.ConjE    = copiarData(obtenerElemento(contenido, 1));
+		Aut.Alfabeto = copiarData(obtenerElemento(contenido, 2));
+		Aut.Inicial  = copiarData(obtenerElemento(contenido, 3));
+		Aut.ConjA    = copiarData(obtenerElemento(contenido, 4));
+		Aut.Delta    = copiarData(obtenerElemento(contenido, 5));
+
+		freeData(contenido);
+	}
+	else
+		Aut.ConjE = Aut.Alfabeto = Aut.Inicial = Aut.ConjA = Aut.Delta = NULL;
+
 	return Aut;
 }
 

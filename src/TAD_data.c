@@ -272,39 +272,7 @@ tData Union (tData A, tData B){
 		agregarData(&C, B->dato);
 		B = B->sig;
 	}
-	return C; /*
-	tData C_Cab = NULL, C_act = NULL;
-	tData aux;
-	
-	while(A != NULL){
-		
-		aux= createSet();
-		aux->dato = copiarData(A->dato);
-		
-		if(C_Cab == NULL) C_Cab = aux;
-		else C_act->sig = aux;
-		
-		C_act= aux;
-		
-		A = A->sig;
-	}
-	while(B != NULL){
-		
-		if(pertenece(C_Cab, B->dato)){
-			
-			aux= createSet();
-			aux->dato = copiarData(B->dato);
-			
-			if(C_Cab == NULL) C_Cab = aux;
-			else C_act->sig = aux;
-			
-			C_act= aux;
-			
-		}
-		B = B->sig;
-	}
-	
-	return C_Cab;*/
+	return C;
 }
 
 tData Interseccion (tData A, tData B){
@@ -315,9 +283,9 @@ tData Interseccion (tData A, tData B){
 		return NULL;
 	tData C_Cab = NULL, C_act = NULL;
 	tData aux;
-	while(A != NULL){
+	while(A){
 		
-		if(! pertenece(B, A->dato)){
+		if(pertenece(B, A->dato)){
 			
 			aux= createSet();
 			aux->dato = copiarData(A->dato);
@@ -344,9 +312,9 @@ tData Diferencia (tData A, tData B){
 	
 	tData C_Cab = NULL, C_act = NULL;
 	tData aux;
-	while(A != NULL){
+	while(A){
 		
-		if( pertenece(B, A->dato)){
+		if(!pertenece(B, A->dato)){
 			
 			aux= createSet();
 			aux->dato = copiarData(A->dato);
@@ -371,7 +339,8 @@ tData DifSimetrica (tData A, tData B){
 	
 	tData F = NULL;
 	F = Union (D, E);
-	
+	freeData(D);
+	freeData(E);
 	
 	return F;
 }

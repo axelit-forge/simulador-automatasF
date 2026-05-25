@@ -2,10 +2,14 @@
 
 #include "TAD_data.h"
 
-int main2() {
+int main() {
 
-    tData hola = crearDesdeCadena("[[q0,0,{q0,q1}],[q0,1,{q0}],[q1,1,{q2}]]");
-    tData soy = crearDesdeCadena("este si");
+    tData hola = crearDesdeCadena("{a,b,c}");
+    tData soy = crearDesdeCadena("{b,c,d}");
+    tData uniOn = Union(hola, soy);
+    tData uniOn2 = Interseccion(hola, soy);
+    tData uniOn3 = Diferencia(hola, soy);
+    tData uniOn4 = DifSimetrica(hola, soy);
 
     mostrarData(soy);
     freeData(soy);
@@ -14,6 +18,14 @@ int main2() {
 
     freeData(hola);
 
+    mostrarData(uniOn);
+    mostrarData(uniOn2);
+    mostrarData(uniOn3);
+    mostrarData(uniOn4);
 
+    freeData(uniOn);
+    freeData(uniOn2);
+    freeData(uniOn3);
+    freeData(uniOn4);
     return 0;
 }
