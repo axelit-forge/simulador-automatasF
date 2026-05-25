@@ -6,6 +6,13 @@ Un motor modular desarrollado en C para procesar y simular el comportamiento de 
 * **Carga por archivo:** El simulador lee y parsea las tablas de transiciones desde archivos externos `.csv` guardados en la carpeta `tests/`.
 * **Modularización por TADs:** Implementación basada en estructuras y contratos propios en C para gestionar de forma aislada los estados, las tuplas, las cadenas y los datos del autómata.
 * **Procesamiento:** El motor recorre la cadena sobre el alfabeto definido y determina si es aceptada o rechazada por el autómata configurado.
+* **Gestión de Memoria Segura:** Código testeado a bajo nivel, garantizando la ausencia de fugas de memoria (*0 leaks*).
+
+## Formato del Archivo CSV
+Para que el parser procese correctamente el autómata, el archivo `.csv` debe cumplir con los siguientes requisitos estrictos:
+* Las transiciones y elementos deben separarse únicamente por comas (ejemplo: `[q0,0,q1]` en lugar de `q0, 0 , q1`).
+* Los estados iniciales y finales se denotan con ->*, los finales con *, y los iniciales con ->, todos delante de la clave del estado
+* En un ND, si se coloca * en la transicion, se toma como vacia
 
 ## Estructura del proyecto
 * `/src`: Archivos de código fuente (`.c`) con la lógica del motor de transiciones y el punto de entrada principal.
@@ -13,9 +20,9 @@ Un motor modular desarrollado en C para procesar y simular el comportamiento de 
 * `/tests`: Casos de prueba y archivos `.csv` con las matrices de transición de los autómatas de ejemplo.
 
 ## Estado actual y próximos pasos
-* [ ] **Depuración de memoria (Prioridad Máxima):** Corregir fugas de memoria y errores de segmentación (`Segmentation Fault` / `malloc corruption`) detectados al procesar cadenas largas en el entorno WSL2.
-* [ ] **Optimización del parser:** Robustecer la lectura de los archivos `.csv` para manejar excepciones de formato de manera controlada.
-* [ ] **Refactorizacion casi completa:** Revisar a detalle la estructura completa para garantizar el correcto funcionamiento utilizando Valgrind
+[x] Depuración de memoria: Fugas de memoria e inseguridades de punteros corregidas por completo. El ciclo de vida de los TADs está blindado bajo entornos de prueba rigurosos en Valgrind (0 bytes in use at exit).
+[x] Construcción Automatizada: Migración exitosa al flujo de compilación nativo con CMake.
+[ ] Revisar la opcion de renombramiento 1.
 
 ## Entorno y compilación
 * **Lenguaje:** C (C99 nativo)
@@ -27,9 +34,23 @@ Para compilar y correr el proyecto de forma directa por terminal sin usar CMake,
 ```bash
 # Compilación enlazando todas las dependencias e incluyendo las cabeceras
 gcc src/main.c src/TAD_automata.c src/TAD_upla.c src/Tad_data.c src/TAD_string.c -o simulador.out -Iinclude
+# O bien, con CMake
+# Crear y entrar al directorio de compilación
+mkdir build && cd build
+
+# Generar los archivos de construcción y compilar
+cmake ..
+make
 
 # Ejecución del binario
 ./simulador.out
+```
+## Verificacion de memoria
+* Para verificar que el Heap se mantiene limpio durante el procesamiento interactivo de cadenas, puedes ejecutar:
+
+
+```bash
+valgrind --leak-check=full --show-leak-kinds=all ./simulador
 ```
 
 *Mantenido por [axelit-forge](https://github.com/axelit-forge)*
