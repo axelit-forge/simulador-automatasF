@@ -8,11 +8,11 @@ Un motor modular desarrollado en C para procesar y simular el comportamiento de 
 * **Procesamiento:** El motor recorre la cadena sobre el alfabeto definido y determina si es aceptada o rechazada por el autómata configurado.
 * **Gestión de Memoria Segura:** Código testeado a bajo nivel, garantizando la ausencia de fugas de memoria (*0 leaks*).
 
-## 📊 Formato del Archivo CSV
+## Formato del Archivo CSV
 
 El parser del simulador espera una matriz de transición clásica. La estructura debe respetar el orden de filas y columnas, utilizando prefijos específicos para identificar los estados iniciales y finales:
 
-### 🗺️ Diseño de la Matriz (Ejemplo)
+###  Diseño de la Matriz (Ejemplo)
 * **Primera fila:** Contiene únicamente los símbolos del alfabeto.
 * **Primera columna:** Contiene los nombres de los estados. Se usa el prefijo `->` para el estado inicial y `*` para los estados finales (de aceptación).
 * **Celdas:** Indican el estado destino.
