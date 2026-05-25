@@ -28,19 +28,33 @@ tData transicion(tData ini, tUpla transi, char c) {
 	return NULL;
 }	
 
-int Verifica_alfabeto(str Cad, tUpla alfabeto){
-	while (alfabeto) {
-		while (Cad) {
-			char simbolo =  simboloDeData(alfabeto->dato);
-			if (Cad->dato == simbolo)
-				return 0;
-			Cad = Cad->sig;
+int Verifica_alfabeto(str Cad, tUpla alfabeto) {
+	str auxCad = Cad;
+
+	while (auxCad) {
+		char charCadena = auxCad->dato;
+		tUpla auxAlf = alfabeto;
+		int encontrado = 0;
+
+		while (auxAlf != NULL) {
+			char charAlfabeto = simboloDeData(auxAlf->dato);
+
+			if (charCadena == charAlfabeto) {
+				encontrado = 1;
+				break;
+			}
+			auxAlf = auxAlf->sig;
 		}
-		alfabeto = alfabeto->sig;
+
+		if (encontrado == 0) {
+			printf("[ERROR] El símbolo '%c' no pertenece al alfabeto del autómata.\n", charCadena);
+			return 0;
+		}
+
+		auxCad = auxCad->sig;
 	}
 	return 1;
 }
-	
 
 int seguir(){
 	int op;
@@ -257,8 +271,11 @@ tUpla cargarContenidoCSV(const char* Ruta) {
 		fila++;
 	}
 
-	agregarData(&Contenido, Alfabeto); agregarData(&Contenido, Estados); agregarData(&Contenido, Finales);
-	agregarData(&Contenido, inicial); agregarData(&Contenido, Transiciones);
+	agregarData(&Contenido, Estados);
+	agregarData(&Contenido, Alfabeto);
+	agregarData(&Contenido, Transiciones);
+	agregarData(&Contenido, inicial);
+	agregarData(&Contenido, Finales);
 
 	freeData(Alfabeto);freeData(Estados);freeData(Finales);freeData(inicial);freeData(Transiciones);
 

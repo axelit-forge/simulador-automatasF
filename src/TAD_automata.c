@@ -2,32 +2,38 @@
 
 int Delta_ND(str Cad, tAF A) {
 	tData act = createSet();
-	act->dato = copiarData (A.Inicial);  
-	
-	while (Cad != NULL) {
-		tData nuevos = NULL;
-		
-		while (act != NULL) {
-			
-			tData trans = transicion(act->dato, A.Delta, Cad->dato);
-			tData unionTmp = Union(nuevos, trans);
-			freeData(nuevos);  
-			nuevos = unionTmp;
-			
-			act = act->sig;
+	agregarData(&act, A.Inicial);
+
+	while (Cad && act) {
+		tData nuevos = createSet();
+		tData trav = act;
+
+		while (trav) {
+			tData trans = transicion(trav->dato, A.Delta, Cad->dato);
+
+			if (trans != NULL) {
+				tData unionTmp = Union(nuevos, trans);
+				if (nuevos) freeData(nuevos);
+				nuevos = unionTmp;
+			}
+			trav = trav->sig;
 		}
 		freeData(act);
-		act = nuevos;  
+		act = nuevos;
 		Cad = Cad->sig;
 	}
-	
-	if (Interseccion(A.ConjA, act) != NULL) {
-		freeData(act);
-		return 1;
+	if (act == NULL) return 0;
+	tData Resultado = Interseccion(A.ConjA, act);
+	int esAceptada = 0;
+
+	if (Resultado != NULL) {
+		if (Resultado->dato != NULL) {
+			esAceptada = 1;
+		}
+		freeData(Resultado);
 	}
-	
 	freeData(act);
-	return 0;
+	return esAceptada;
 }
 
 int Delta_D(str Cad, tAF A){
@@ -35,23 +41,29 @@ int Delta_D(str Cad, tAF A){
 	
 	while(Cad!=NULL ){
 		act = transicion(act, A.Delta, Cad->dato);
+		if (!act) return 0;
 		Cad=Cad->sig;
 	}
-    if(pertenece(A.ConjA, act) == 0)
-		return 1;
-	return 0;
+	return pertenece(A.ConjA, act);
 }
 	
-int Esdet(tAF A){
-	tData aux,nav;
-	aux = A.Delta;
-	nav = ((aux->dato)->sig)->sig;
-	if((nav->dato->tipoNodo) == 1){
-		return 1;
+int esDet(tAF A) {
+	if (A.Delta == NULL) return 1;
+
+	tData trav = A.Delta;
+
+	while (trav) {
+
+		tData tripla = trav->dato;
+		if (tripla) {
+			tData destino = obtenerElemento(tripla, 2);
+			if (destino != NULL && destino->tipoNodo == SET) {
+				return 0;
+			}
+		}
+		trav = trav->sig;
 	}
-	else{
-		return 0;
-	}
+	return 1;
 }
 
 void Mostrar_aut(tAF B){
@@ -70,27 +82,27 @@ void Mostrar_aut(tAF B){
 	
 	
 void Verifica_cad(tAF B){
-	str cad;
-	
-	printf("\nIngrese cadena:");
-	cad = load();
-	if(Verifica_alfabeto(cad, B.Alfabeto)){
-		if((Esdet(B))==1){
-			if(Delta_D(cad,B))
-				printf("\n La cadena ingresada es aceptada\n");
-			else
-				printf("\n La cadena ingresada no es aceptada\n");
-		}
-		else{
-			if(Delta_ND(cad,B)==1)
-				printf("\n La cadena ingresada es aceptada\n");
-			else
-				printf("\n La cadena ingresada no es aceptada\n");
-		}
-		
+	if (B.Delta == NULL) return;
+
+	printf("\nIngrese cadena: ");
+	str cad = load();
+
+	if (Verifica_alfabeto(cad, B.Alfabeto)) {
+		int aceptada = 0;
+
+		if (esDet(B) == 1)
+			aceptada = Delta_D(cad, B);
+		else
+			aceptada = Delta_ND(cad, B);
+
+
+		if (aceptada)
+			printf("\nLa cadena ingresada es aceptada\n");
+		else
+			printf("\nLa cadena ingresada no es aceptada\n");
 	}
-	else
-		printf("La cadena ingresada tenia simbolos que no son del alfabeto, no es aceptada\n");
+
+	freeString(cad);
 }
 tAF Cargar_hard(){
 	tAF nue;
@@ -183,11 +195,11 @@ tAF cargaCSV(const char* rutaCSV) {
 	tUpla contenido = cargarContenidoCSV(rutaCSV);
 
 	if (contenido) {
-		Aut.ConjE    = copiarData(obtenerElemento(contenido, 1));
-		Aut.Alfabeto = copiarData(obtenerElemento(contenido, 2));
+		Aut.ConjE    = copiarData(obtenerElemento(contenido, 0));
+		Aut.Alfabeto = copiarData(obtenerElemento(contenido, 1));
+		Aut.Delta    = copiarData(obtenerElemento(contenido, 2));
 		Aut.Inicial  = copiarData(obtenerElemento(contenido, 3));
 		Aut.ConjA    = copiarData(obtenerElemento(contenido, 4));
-		Aut.Delta    = copiarData(obtenerElemento(contenido, 5));
 
 		freeData(contenido);
 	}
@@ -248,7 +260,7 @@ tData RetornaEstado(tData nvoE,tUpla Delta,char a){
 	
 
 tAF ConversionAF(tAF A){
-	if (Esdet(A) == 1) return A;
+	if (esDet(A) == 1) return A;
 	
 	tData nvoE,auxAlf;
 	
