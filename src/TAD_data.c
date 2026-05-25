@@ -7,6 +7,8 @@ tData createData(int tipo){
 	if(tipo == STR){
 		nvo->cad = NULL;
 		nvo->tipoNodo = STR;
+		nvo->dato = NULL;
+		nvo->sig = NULL;
 	}
 	else {
 		nvo->dato = NULL;
@@ -473,7 +475,7 @@ tData crearDesdeCadena(const char *input) {
 		resultado = __procesadoCadena(&copia);
 		freeString(cadenaInput);
 	}
-	
+
 	return resultado;
 }
 
@@ -485,36 +487,36 @@ char simboloDeData(tData a){				//devuelve solo el primer cad
 		return a->cad->dato;
 }
 	
-tData toString(tData H) {					//revisar para que funcione, de todas formas no es util en el programa
+tData __conjuntoAString(tData H) {
 	tData nvo = createStr();
-
-	str resultado = create(); 
+	str resultado = create();
 	resultado->dato = '{';
-	
-	str actual = resultado;  
-	
+	str trav = resultado;
+
 	while (H != NULL) {
-		if (H->dato != NULL && H->dato->cad != NULL) {
+		if (H->dato != NULL && H->dato->tipoNodo == STR && H->dato->cad != NULL) {
 			str copiado = copyStr(H->dato->cad);
-			
-			while (actual->sig != NULL) actual = actual->sig;
-			actual->sig = copiado;
-			
-			while (actual->sig != NULL) actual = actual->sig;
-			
+
+			trav->sig = copiado;
+
+			while (trav->sig != NULL) {
+				trav = trav->sig;
+			}
+
 			if (H->sig != NULL) {
-				actual->sig = create();
-				actual = actual->sig;
-				actual->dato = ',';
+				trav->sig = create();
+				trav = trav->sig;
+				trav->dato = ',';
 			}
 		}
 		H = H->sig;
 	}
-		
-	actual->sig = create();
-	actual = actual->sig;
-	actual->dato = '}';
-	
+
+	trav->sig = create();
+	trav = trav->sig;
+	trav->dato = '}';
+	trav->sig = NULL;
+
 	nvo->cad = resultado;
 	return nvo;
 }

@@ -11,6 +11,8 @@ add_executable(simulador_automata
     src/TAD_string.c
         src/test_data.c
 )
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories(simulador_automata PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/includes

@@ -1,26 +1,35 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "TAD_automata.h"
-void Menu();
-	
-int main(){
 
-	tAF A = Cargar_hard();
-	Mostrar_aut(A);
-	Verifica_cad(A);
-	
-	
-	tAF B = ConversionAF(A);
-	
-	
-	Mostrar_aut(B);
-	Verifica_cad(B);
-	
-	
-	renombramiento(&B, 2);
-	Mostrar_aut(B);
-	
-	Verifica_cad(B);
-	
-	
+int main() {
+	char entrada[256];
+
+	const char* rutaCSV = "tests/Datos.csv";
+	tAF miAutomata = cargaCSV(rutaCSV);
+
+	printf("\n--- Estructura del Autómata Cargado ---\n");
+	Mostrar_aut(miAutomata);
+	printf("\n----------------------------------------\n");
+
+	while (1) {
+		printf("\nIngrese una cadena para evaluar (o '-1' para salir): ");
+		if (scanf("%255s", entrada) != 1) break;
+
+		if (strcmp(entrada, "-1") == 0) {
+			break;
+		}
+
+		str cad = load2(entrada);
+
+		Verifica_cad(miAutomata, cad);
+
+		freeString(cad);
+	}
+
+	freeAut(miAutomata);
+	printf("\nPrograma finalizado correctamente.\n");
 	return 0;
 }
 	
@@ -44,7 +53,7 @@ void Menu(tAF *A){
 	switch(op){
 	case 1:*A =Cargar_Consola();break;
 	case 2:*A =Cargar_hard();break;
-	case 3:*A =Cargar_desde_excel();break;
+	case 3:*A =cargaCSV("tests/Datos4.csv");break;
 	}
 	
 }

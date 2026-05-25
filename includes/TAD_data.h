@@ -34,7 +34,7 @@ void agregarData(tData*, tData);
 void freeData(tData);
 tData cargar();
 tData crearArbol(int, int);
-tData toString(tData);
+tData __conjuntoAString(tData);
 
 //operaciones de conjunto
 tData Union (tData, tData);

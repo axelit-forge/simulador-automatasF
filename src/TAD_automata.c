@@ -81,11 +81,11 @@ void Mostrar_aut(tAF B){
 }	
 	
 	
-void Verifica_cad(tAF B){
+void Verifica_cad(tAF B, str cad){
 	if (B.Delta == NULL) return;
 
 	printf("\nIngrese cadena: ");
-	str cad = load();
+	cad = load();
 
 	if (Verifica_alfabeto(cad, B.Alfabeto)) {
 		int aceptada = 0;
@@ -102,7 +102,6 @@ void Verifica_cad(tAF B){
 			printf("\nLa cadena ingresada no es aceptada\n");
 	}
 
-	freeString(cad);
 }
 tAF Cargar_hard(){
 	tAF nue;
@@ -209,18 +208,11 @@ tAF cargaCSV(const char* rutaCSV) {
 	return Aut;
 }
 void freeAut(tAF A) {
-	freeData(A.Alfabeto);
-	freeData(A.Inicial);
-	freeData(A.Delta);
-	freeData(A.ConjE);
-	freeData(A.ConjA);
-}
-
-tData creaResidual(){
-	tData nvo = createSet();
-	nvo->dato= createStr();
-	nvo->dato->cad = load2("-R");
-	return nvo;
+	if (A.ConjE != NULL) freeData(A.ConjE);
+	if (A.Alfabeto != NULL) freeData(A.Alfabeto);
+	if (A.ConjA != NULL) freeData(A.ConjA);
+	if (A.Inicial != NULL) freeData(A.Inicial);
+	if (A.Delta != NULL) freeData(A.Delta);
 }
 
 
@@ -259,162 +251,195 @@ tData RetornaEstado(tData nvoE,tUpla Delta,char a){
 }	
 	
 
-tAF ConversionAF(tAF A){
-	if (esDet(A) == 1) return A;
-	
-	tData nvoE,auxAlf;
-	
-	tData origen, caracter , destino , transicion;
-	
-	tAF B;
-	
-	B.Alfabeto= copiarData(A.Alfabeto);
-	
-	B.Inicial = createSet();
-	B.Inicial->dato = copiarData(A.Inicial);
-	B.ConjE = createSet();
-	B.Delta = createList();
-	B.ConjA = createSet();
-	
-	agregarData(&B.ConjE,B.Inicial);
-	
-	while(BuscameT(B.ConjE,B.Delta,B.Alfabeto)){
-		
-		nvoE = BuscameT(B.ConjE,B.Delta,B.Alfabeto);
-		auxAlf = B.Alfabeto;
-		while(auxAlf!=NULL){
-			
-			char car = simboloDeData(auxAlf->dato);
-			destino = RetornaEstado(nvoE,A.Delta,car);
-			
-			origen = copiarData(nvoE);
-			caracter = createStr();
-			caracter->cad->dato= car;
-			
-			transicion= createList();
-			
-			if(destino == NULL){
-				destino = creaResidual();
-			}
-			
-			agregarData(&transicion, origen);
-			agregarData(&transicion, caracter);
-			agregarData(&transicion, destino);
-			
-			agregarData(&B.Delta, transicion);
-			auxAlf = auxAlf->sig;
-			
-			
-			agregarData(&B.ConjE, destino);
-			
-			freeData(origen);
-			freeData(caracter);
-			freeData(destino);
-			freeData(transicion);
-		}
-		
-	}
-	
-	tData finales = B.ConjE;
-	
-	while(finales != NULL){
-		tData temp = Interseccion(finales->dato, A.ConjA);
-		if( temp != NULL){
-			agregarData(&B.ConjA, finales->dato);
-			freeData(temp);
-		}
-		finales = finales->sig;
-	}
-	
-	renombramiento(&B, 1);
-	
-	
-	return B;
+tAF ConversionAF(tAF A) {
+    if (esDet(A) == 1) {
+       printf("El automata es determinista.\n");
+       tAF vacio = {NULL, NULL, NULL, NULL, NULL};
+       return vacio;
+    }
+
+    tAF B;
+    B.Alfabeto = copiarData(A.Alfabeto);
+    B.Delta = createList();
+    B.ConjA = createSet();
+    B.ConjE = createSet();
+    B.Inicial = createSet();
+    agregarData(&B.Inicial, A.Inicial);
+
+    agregarData(&B.ConjE, B.Inicial);
+
+    tData cursorEstados = B.ConjE;
+
+    while (cursorEstados != NULL) {
+       tData nvoE = cursorEstados->dato;
+       tData auxAlf = B.Alfabeto;
+
+       while (auxAlf != NULL) {
+          char car = simboloDeData(auxAlf->dato);
+
+          tData destino = RetornaEstado(nvoE, A.Delta, car);
+
+          if (destino == NULL || (destino->tipoNodo == SET && destino->dato == NULL && destino->sig == NULL)) {
+             if (destino) freeData(destino);
+             destino = createStr();
+             destino->cad = create();
+             destino->cad->dato = 'E';
+          }
+
+          tData origen = copiarData(nvoE);
+          tData caracter = createStr();
+          caracter->cad = create();
+          caracter->cad->dato = car;
+
+          tData transicion = createList();
+          agregarData(&transicion, origen);
+          agregarData(&transicion, caracter);
+          agregarData(&transicion, destino);
+
+          agregarData(&B.Delta, transicion);
+
+          agregarData(&B.ConjE, destino);
+
+          freeData(origen);
+          freeData(caracter);
+          freeData(destino);
+          freeData(transicion);
+
+          auxAlf = auxAlf->sig;
+       }
+       cursorEstados = cursorEstados->sig;
+    }
+
+    tData finales = B.ConjE;
+    while (finales != NULL) {
+       tData temp = Interseccion(finales->dato, A.ConjA);
+
+       if (temp != NULL) {
+          if (temp->dato != NULL || temp->sig != NULL) {
+             agregarData(&B.ConjA, finales->dato);
+          }
+          freeData(temp);
+       }
+       finales = finales->sig;
+    }
+    renombramiento(&B, 0);
+
+    return B;
 }
 	
 tData buscarRenombre(tData original, tUpla listaCambios) {
-	while (listaCambios != NULL) {
-		tData par = listaCambios->dato;
-		tData viejo = obtenerElemento(par, 0);
-		tData nuevo = obtenerElemento(par, 1);
-		
-		if (viejo != NULL && igualdad(viejo, original) == 0) {
-			return nuevo;
-		}
-		listaCambios = listaCambios->sig;
-	}
-	return copiarData(original);
-}	
-	
-tUpla renombrarTransiciones(tUpla Delta, tUpla listaCambios) {
-	tUpla nuevoDelta = createList();
-	while (Delta != NULL) {
-		tData trans = Delta->dato;
-		tData origen = buscarRenombre(trans->dato, listaCambios);
-		tData simbolo = copiarData(trans->sig->dato);
-		tData destino = buscarRenombre(trans->sig->sig->dato, listaCambios);
-		
-		tData nuevaTrans = createList();
-		agregarData(&nuevaTrans, copiarData(origen));
-		agregarData(&nuevaTrans, simbolo);
-		agregarData(&nuevaTrans, copiarData(destino));
-		
-		agregarData(&nuevoDelta, nuevaTrans);
-		Delta = Delta->sig;
-	}
-	return nuevoDelta;
+    while (listaCambios != NULL) {
+       tData par = listaCambios->dato;
+       tData viejo = obtenerElemento(par, 0);
+       tData nuevo = obtenerElemento(par, 1);
+
+       if (viejo != NULL && igualdad(viejo, original) == 0) {
+          return nuevo;
+       }
+       listaCambios = listaCambios->sig;
+    }
+    return original;
 }
+
+tUpla renombrarTransiciones(tUpla Delta, tUpla listaCambios) {
+    tUpla nuevoDelta = createList();
+    tUpla auxDelta = Delta;
+
+    while (auxDelta != NULL) {
+       tData trans = auxDelta->dato;
+
+       if (trans != NULL) {
+          tData origViejo = obtenerElemento(trans, 0);
+          tData simbViejo = obtenerElemento(trans, 1);
+          tData destViejo = obtenerElemento(trans, 2);
+
+          tData origenNuevo = buscarRenombre(origViejo, listaCambios);
+          tData destinoNuevo = buscarRenombre(destViejo, listaCambios);
+
+          tData nuevaTrans = createList();
+
+          agregarData(&nuevaTrans, origenNuevo);
+          agregarData(&nuevaTrans, simbViejo);
+          agregarData(&nuevaTrans, destinoNuevo);
+
+          agregarData(&nuevoDelta, nuevaTrans);
+
+          freeData(nuevaTrans);
+       }
+
+       auxDelta = auxDelta->sig;
+    }
+    return nuevoDelta;
+}
+
 tUpla renombrarConjunto(tUpla conjuntoOriginal, tUpla listaCambios) {
-	tUpla nuevo = createSet();
-	while (conjuntoOriginal != NULL) {
-		tData nuevoElem = buscarRenombre(conjuntoOriginal->dato, listaCambios);
-		agregarData(&nuevo, copiarData(nuevoElem));
-		conjuntoOriginal = conjuntoOriginal->sig;
-	}
-	return nuevo;
-}	
+    tUpla nuevo = createSet();
+    tUpla aux = conjuntoOriginal;
+
+    while (aux != NULL) {
+       tData nuevoElem = buscarRenombre(aux->dato, listaCambios);
+
+       if (nuevoElem != NULL) {
+          agregarData(&nuevo, nuevoElem);
+       }
+
+       aux = aux->sig;
+    }
+    return nuevo;
+}
 
 tData crearP(int p) {
-	tData nvo = createStr();
-	char buffer[10];
-	sprintf(buffer, "P%d", p);
-	
-	nvo->cad = load2(buffer);
-	return nvo;
-}
-	
-void renombramiento(tAF *A, int option){
-	tData listaCambios = createList();
-	
-	tUpla conjuntos = A->ConjE;
-	int p = 0;
-	
-	while(conjuntos != NULL){
-		tData Cambio = createList();
-		
-		agregarData(&Cambio, conjuntos->dato);
-		if(option == 1){
-			agregarData(&Cambio, toString(conjuntos->dato));
-		}
-		else{
-		   agregarData(&Cambio, crearP(p));
-		   p++;
-		}
-		
-		agregarData(&listaCambios, Cambio);
-		
-		conjuntos = conjuntos->sig;
-	}
-	
-	A->ConjE = renombrarConjunto(A->ConjE, listaCambios);
-	A->ConjA = renombrarConjunto(A->ConjA, listaCambios);
-	A->Inicial = copiarData(A->ConjE->dato);
-	
-	
-	A->Delta = renombrarTransiciones(A->Delta, listaCambios);
-	
-	freeData(listaCambios);
+    tData nvo = createStr();
+    char buffer[10];
+    sprintf(buffer, "P%d", p);
+
+    nvo->cad = load2(buffer);
+    return nvo;
 }
 
-	
+void renombramiento(tAF *A, int option) {
+    tData listaCambios = createList();
+    tUpla conjuntos = A->ConjE;
+    int p = 0;
+
+    while (conjuntos != NULL) {
+       tData Cambio = createList();
+
+       agregarData(&Cambio, conjuntos->dato);
+       if (option == 1) {
+          tData nvoStr = __conjuntoAString(conjuntos->dato);
+          agregarData(&Cambio, nvoStr);
+          freeData(nvoStr);
+       } else {
+          tData nvoP = crearP(p);
+          agregarData(&Cambio, nvoP);
+          freeData(nvoP);
+          p++;
+       }
+
+       agregarData(&listaCambios, Cambio);
+       freeData(Cambio);
+
+       conjuntos = conjuntos->sig;
+    }
+
+    tUpla viejoConjE = A->ConjE;
+    A->ConjE = renombrarConjunto(viejoConjE, listaCambios);
+    freeData(viejoConjE);
+
+    tUpla viejoConjA = A->ConjA;
+    A->ConjA = renombrarConjunto(viejoConjA, listaCambios);
+    freeData(viejoConjA);
+
+    if (A->Inicial != NULL) {
+       freeData(A->Inicial);
+    }
+    A->Inicial = copiarData(A->ConjE->dato);
+
+    tUpla viejaDelta = A->Delta;
+    A->Delta = renombrarTransiciones(viejaDelta, listaCambios);
+    freeData(viejaDelta);
+
+    freeData(listaCambios);
+}
 	

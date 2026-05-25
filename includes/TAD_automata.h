@@ -13,7 +13,7 @@ typedef struct{
 
 void Mostrar_aut(tAF);
 void MostrarUpla(tAF);
-void Verifica_cad(tAF);
+void Verifica_cad(tAF, str);
 
 tAF Cargar_hard();
 tAF Cargar_Consola();
