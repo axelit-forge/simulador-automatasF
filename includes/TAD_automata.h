@@ -17,10 +17,12 @@ void Verifica_cad(tAF);
 
 tAF Cargar_hard();
 tAF Cargar_Consola();
-tAF Cargar_desde_excel();
+tAF cargaCSV(const char*);
 
 tAF ConversionAF(tAF A);
 void renombramiento(tAF *A, int option);
+
+void  freeAut(tAF A);
 
 
 #endif

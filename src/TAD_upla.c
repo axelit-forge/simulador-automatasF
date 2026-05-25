@@ -176,182 +176,92 @@ tUpla cargarTransicion(tUpla Alfa, tUpla Estado, int a){
 	}
 return nuevo;
 }
-	
-tUpla cargarAlfabeto2() {
-	tUpla nuevo;
-	nuevo = createSet();
-	int col=0;
-	char linea[TAM];
-	char*token;
-	
-	FILE* file = fopen("Datos.csv", "r");
-	if (file == NULL)
-		return NULL;
-
-	fgets(linea, sizeof(linea), file);
-	linea[strcspn(linea, "\n")] = 0;
-	token = strtok(linea, ";");
-	
-	while (token) {
-		if (col > 0) {  // Ignorar "Q/E"
-			tData simbolo = createStr();
-			simbolo->cad = load2(token);
-			agregarData(&nuevo, simbolo);
-		}
-		token = strtok(NULL, ";");
-		col++;
-	}
-	fclose(file);
-	return nuevo;
-} 
-	
-tUpla cargarEstado2() {
-	tUpla nuevo = createSet();
-	char linea[TAM];
-	char *token;
-	
-	FILE *file = fopen("Datos.csv", "r");
-	fgets(linea, sizeof(linea), file);  
-	
-	while (fgets(linea, sizeof(linea), file)) {
-		linea[strcspn(linea, "\n")] = 0;
-		token = strtok(linea, ";");
-		
-		if (token != NULL) {
-			
-			if (strncmp(token, "->*", 3) == 0) token += 3;
-			else if (strncmp(token, "->", 2) == 0) token += 2;
-			else if (token[0] == '*') token += 1;
-			
-			tData aux = createStr();
-			aux->cad = load2(token);
-			agregarData(&nuevo, aux);
-		}
-	}
-	fclose(file);
-	return nuevo;
-}
-	
-tUpla cargarInicial2() {
-	tData nuevo = createStr();
-	char linea[TAM];
-	char *token;
-	
-	int b = 0;
-	
-	FILE* file = fopen("Datos.csv", "r");
-	
-	fgets(linea, sizeof(linea), file); 
-	
-	while(fgets(linea, sizeof(linea), file) && b == 0){
-		linea[strcspn(linea, "\n")] = 0;
-		token = strtok(linea, ";");
-		
-		if (strncmp(token, "->*", 3) == 0){
-			token += 3; 
-			nuevo->cad = load2(token);
-			b = 1;
-		}
-		else{
-			if(strncmp(token, "->", 2) == 0){
-				token +=2;
-				nuevo->cad = load2(token);
-				b =1;
-			}
-		}
-		
-	}
-	
-	fclose(file);
-	return nuevo;
-}
-	
-tUpla cargarFinal2() {	
-	tUpla nuevo = createSet();
-	char linea[TAM];
-	char *token;
-	
-	FILE *file = fopen("Datos.csv", "r");
-	fgets(linea, sizeof(linea), file); 
-	
-	while (fgets(linea, sizeof(linea), file)) {
-		linea[strcspn(linea, "\n")] = 0;
-		token = strtok(linea, ";");
-	
-		if (token != NULL) {
-			if (strncmp(token, "*", 1) == 0) {
-				tData aux = createStr();
-				aux->cad = load2(token + 1);  /*salta '*'*/
-				agregarData(&nuevo, aux);
-			} else if (strncmp(token, "->*", 3) == 0) {
-				tData aux = createStr();
-				aux->cad = load2(token + 3);  /*salta '->*'*/
-				agregarData(&nuevo, aux);
-			}
-		}
-	}
-	fclose(file);
-	return nuevo;
-}
-	
-	
-tUpla cargarTransicion2(tUpla Alfa, tUpla Estados) {
-	tUpla nuevo = createList();
-	tUpla nav;
-	char linea[TAM];
-	char *token;
-	int col;
-	
-	FILE* file = fopen("Datos.csv", "r");
-	fgets(linea, sizeof(linea), file);  
-	fgets(linea, sizeof(linea), file);  
-	
-	while (Estados != NULL && !feof(file)) {
-		linea[strcspn(linea, "\n")] = 0;
-		token = strtok(linea, ";");
-		
-		if (strncmp(token, "->*", 3) == 0) token += 3;
-		else if (strncmp(token, "->", 2) == 0) token += 2;
-		else if (token[0] == '*') token += 1;
-		
-		tData estadoOrigen = createStr();
-		estadoOrigen->cad = load2(token);
-		
-		tUpla alfaActual = Alfa;
-		col = 0;
-		
-		while (alfaActual != NULL) {
-			token = strtok(NULL, ";");
-			if (token == NULL) break;
-			
-/*			Solo agregamos la transici�n si el destino NO es "*"*/
-			if (strcmp(token, "*") != 0) {
-				tData simbolo = copiarData(alfaActual->dato);
-				tData destino = NULL;
-				destino = crearDesdeCadena(token);
-				
-/*				 Crear la transici�n*/
-				nav = createList();
-				agregarData(&nav, copiarData(estadoOrigen)); // origen
-				agregarData(&nav, simbolo);                  // s�mbolo
-				agregarData(&nav, destino);                  // destino
-				
-				agregarData(&nuevo, nav);
-			}
-			
-			alfaActual = alfaActual->sig;
-			col++;
-		}
-		
-		fgets(linea, sizeof(linea), file);
-	}
-	
-	fclose(file);
-	return nuevo;
-}
 
 tUpla cargarContenidoCSV(const char* Ruta) {
 	//salvese quien pueda :'v
+	FILE* file = fopen(Ruta, "r");
+	if (file == NULL) {
+		printf("Error: No se pudo abrir %s\n", Ruta);
+		return NULL;
+	}
+	tUpla Contenido = createList();
 
+	tUpla Alfabeto=createSet(), Estados=createSet(), Finales=createSet(), inicial=NULL, Transiciones=createList();
 
+	char linea[1024];
+	int col = 0;
+	int fila = 0;
+	char* token;
+
+	while (fgets(linea, sizeof(linea), file)) {
+		linea[strcspn(linea, "\r\n")] = 0;
+		token = strtok(linea, ";");
+
+		col= 0;
+		while (token) {
+
+			if (fila==0 && col>0) {				//agregamos el alfabeto
+
+				tData simbolo = crearDesdeCadena(token);
+				agregarData(&Alfabeto, simbolo);
+				freeData(simbolo);
+
+			}
+			if (col==0 && fila != 0) {			//agregamos los estados
+				tData estado;
+				if (strncmp(token, "->*", 3) == 0){				//es final e inicial
+					token += 3;
+					estado = crearDesdeCadena(token);
+					agregarData(&Finales, estado);
+					inicial = copiarData(estado);
+				}
+
+				else if (strncmp(token, "->", 2) == 0) {		//es inicial
+					token += 2;
+					estado = crearDesdeCadena(token);
+					inicial = copiarData(estado);
+				}
+				else if (token[0] == '*') {								//es final
+					token += 1;
+					estado = crearDesdeCadena(token);
+					agregarData(&Finales, estado);
+				}
+				else {													//es un estadocomun
+					estado = crearDesdeCadena(token);
+				}
+
+				agregarData(&Estados, estado);
+				freeData(estado);
+			}
+			if (col!=0 && fila !=0) {			//agregamos las transiciones
+
+				if (strcmp(token, "*") != 0){
+					tData transicionSingular = createList();
+					tData origen = obtenerElemento(Estados,fila-1);
+					tData simbolo = obtenerElemento(Alfabeto,col-1);
+					tData destino = crearDesdeCadena(token);
+
+					agregarData(&transicionSingular, origen);
+					agregarData(&transicionSingular, simbolo);
+					agregarData(&transicionSingular, destino);
+
+					agregarData(&Transiciones, transicionSingular);
+					freeData(destino);
+					freeData(transicionSingular);
+				}
+			}
+
+			token = strtok(NULL, ";");
+			col++;
+		}
+		fila++;
+	}
+
+	agregarData(&Contenido, Alfabeto); agregarData(&Contenido, Estados); agregarData(&Contenido, Finales);
+	agregarData(&Contenido, inicial); agregarData(&Contenido, Transiciones);
+
+	freeData(Alfabeto);freeData(Estados);freeData(Finales);freeData(inicial);freeData(Transiciones);
+
+	fclose(file);
+	return Contenido;
 }

@@ -19,10 +19,7 @@ tUpla cargarInicial(tUpla);
 tUpla cargarFinal(tUpla);
 tUpla cargarTransicion(tUpla,tUpla,int);
 
-tUpla cargarAlfabeto2();
-tUpla cargarEstado2();
-tUpla cargarInicial2();
-tUpla cargarFinal2();
-tUpla cargarTransicion2(tUpla ,tUpla);
+
+tUpla cargarContenidoCSV(const char*);
 
 #endif

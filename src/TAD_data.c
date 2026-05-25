@@ -461,16 +461,19 @@ int __llavesEqui (const char* revisar) {
 tData crearDesdeCadena(const char *input) {
 	tData resultado = NULL;
 	int bienDefinido = __llavesEqui(input);
-	if (bienDefinido){
+
+	if (input[0] != '{' && input[0] != '[') {
+		resultado = createStr();
+		resultado->cad = load2(input);
+	}
+	else
+		if (bienDefinido){
 		str cadenaInput = load2(input);
 		str copia = cadenaInput;
 		resultado = __procesadoCadena(&copia);
 		freeString(cadenaInput);
 	}
-	else {
-		resultado = createStr();
-		resultado->cad = load2(input);
-	}
+	
 	return resultado;
 }
 

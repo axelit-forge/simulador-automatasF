@@ -31,8 +31,7 @@ int Delta_ND(str Cad, tAF A) {
 }
 
 int Delta_D(str Cad, tAF A){
-	tData act;
-	act = copiarData(A.Inicial);
+	tData act = A.Inicial;
 	
 	while(Cad!=NULL ){
 		act = transicion(act, A.Delta, Cad->dato);
@@ -196,6 +195,13 @@ tAF cargaCSV(const char* rutaCSV) {
 		Aut.ConjE = Aut.Alfabeto = Aut.Inicial = Aut.ConjA = Aut.Delta = NULL;
 
 	return Aut;
+}
+void freeAut(tAF A) {
+	freeData(A.Alfabeto);
+	freeData(A.Inicial);
+	freeData(A.Delta);
+	freeData(A.ConjE);
+	freeData(A.ConjA);
 }
 
 tData creaResidual(){
